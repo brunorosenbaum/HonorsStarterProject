@@ -5,7 +5,8 @@
 App1::App1()
 {
 	plane_mesh_ = nullptr; 
-
+	directional_light_sphere_ = nullptr;
+	cube_mesh_ = nullptr; 
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -18,9 +19,27 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	// Initalise scene geometry meshes.
 	plane_mesh_ = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+	directional_light_sphere_ = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
+	cube_mesh_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+
+	//Initialize lights
+	lights_[0] = new Light();
+	lights_[0]->setAmbientColour(0.1f, 0.1f, 0.1f, 1.0f);
+	lights_[0]->setDiffuseColour(1.0f, 0.0f, 1.0f, 1.0f);
+	lights_[0]->setDirection(0, -1, 0);
+	lights_[0]->setPosition(10, 10, 10);
+		//Light direction and position for IMGUI
+		light_direction_[0] = lights_[0]->getDirection().x; 
+		light_direction_[1] = lights_[0]->getDirection().y; 
+		light_direction_[2] = lights_[0]->getDirection().z;
+
+		directional_position_[0] = lights_[0]->getPosition().x;
+		directional_position_[1] = lights_[0]->getPosition().y;
+		directional_position_[2] = lights_[0]->getPosition().z;
 
 	//Initialize shader managers
 	textureSM = new TextureSM(renderer->getDevice(), hwnd);
+	lightsSM = new LightsSM(renderer->getDevice(), hwnd); 
 
 
 }
@@ -70,7 +89,11 @@ bool App1::render()
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
 
 	//Render geometry
-	drawPlane(worldMatrix, viewMatrix, projectionMatrix); 
+	drawPlane(worldMatrix, viewMatrix, projectionMatrix);
+	cube_mesh_->sendData(renderer->getDeviceContext());
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), XMMatrixTranslation(10, 1, 10) * worldMatrix , viewMatrix, projectionMatrix, XMFLOAT4(1, 1, 1, 1));
+	lightsSM->render(renderer->getDeviceContext(), cube_mesh_->getIndexCount());
+	drawLights(worldMatrix, viewMatrix, projectionMatrix);
 	// Render GUI
 	gui();
 
@@ -88,6 +111,14 @@ void App1::drawPlane(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 
 }
 
+void App1::drawLights(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
+{
+	directional_light_sphere_->sendData(renderer->getDeviceContext());
+	XMMATRIX directionalLightPos = XMMatrixTranslation(directional_position_[0], directional_position_[1], directional_position_[2]);
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), world * directionalLightPos, view, projection, lights_[0]->getDiffuseColour());
+	lightsSM->render(renderer->getDeviceContext(), directional_light_sphere_->getIndexCount()); 
+}
+
 void App1::gui()
 {
 	// Force turn off unnecessary shader stages.
@@ -98,6 +129,16 @@ void App1::gui()
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+
+	if (ImGui::TreeNode("Directional light config")) {
+		ImGui::SliderFloat3("Direction", light_direction_, -1, 1, "%.3f", 1);
+		lights_[0]->setDirection(light_direction_[0], light_direction_[1], light_direction_[2]);
+
+		ImGui::SliderFloat3("Position", directional_position_, -20, 20, "%.3f", 1);
+		lights_[0]->setPosition(directional_position_[0], directional_position_[1], directional_position_[2]);
+		ImGui::TreePop();
+
+	}
 
 	// Render UI
 	ImGui::Render();
