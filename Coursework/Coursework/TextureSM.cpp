@@ -120,9 +120,14 @@ void TextureSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XM
 	lightPtr = (LightBufferType*)mappedResource.pData;
 
 	lightPtr->ambient = lights[0]->getAmbientColour();
-	lightPtr->diffuse = lights[0]->getDiffuseColour();
-	lightPtr->position = XMFLOAT4(lights[0]->getPosition().x, lights[0]->getPosition().y, lights[0]->getPosition().z, 1);
+	lightPtr->diffuse[0] = lights[0]->getDiffuseColour();
+	lightPtr->position[0] = XMFLOAT4(lights[0]->getPosition().x, lights[0]->getPosition().y, lights[0]->getPosition().z, 1);
 	lightPtr->direction = lights[0]->getDirection();
+
+	//Point light
+	lightPtr->diffuse[1] = lights[1]->getDiffuseColour();
+	lightPtr->position[1] = XMFLOAT4(lights[1]->getPosition().x, lights[1]->getPosition().y, lights[1]->getPosition().z, 1);
+
 	lightPtr->padding = 0;
 	deviceContext->Unmap(lightBuffer, 0);
 

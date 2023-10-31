@@ -59,4 +59,9 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LightingCalcs.hlsli">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

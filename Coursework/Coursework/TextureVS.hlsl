@@ -13,6 +13,8 @@ struct InputType
     float4 position : POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
+    float3 worldPosition : TEXCOORD1;
+
 };
 
 struct OutputType
@@ -20,6 +22,8 @@ struct OutputType
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
+    float3 worldPosition : TEXCOORD1;
+
 };
 
 OutputType main(InputType input)
@@ -33,6 +37,7 @@ OutputType main(InputType input)
 
     // Store the texture coordinates for the pixel shader.
     output.tex = input.tex;
+    output.worldPosition = mul(input.position, worldMatrix).xyz;
 
     output.normal = input.normal;
 

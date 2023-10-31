@@ -20,7 +20,7 @@ public:
 protected:
 	bool render();
 	void drawPlane(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
-	void drawLights(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
+	void drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
 	void gui();
 
 private:

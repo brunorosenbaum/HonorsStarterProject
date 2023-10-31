@@ -99,10 +99,8 @@ bool App1::render()
 
 	//Render geometry
 	drawPlane(worldMatrix, viewMatrix, projectionMatrix);
-	cube_mesh_->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(), XMMatrixTranslation(10, 1, 10) * worldMatrix , viewMatrix, projectionMatrix,lights_);
-	lightsSM->render(renderer->getDeviceContext(), cube_mesh_->getIndexCount());
-	drawLights(worldMatrix, viewMatrix, projectionMatrix);
+	
+	drawObjects(worldMatrix, viewMatrix, projectionMatrix);
 	// Render GUI
 	gui();
 
@@ -120,12 +118,16 @@ void App1::drawPlane(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 
 }
 
-void App1::drawLights(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
+void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 {
 	directional_light_sphere_->sendData(renderer->getDeviceContext());
 	XMMATRIX pointLightPos = XMMatrixTranslation(directional_position_[0], directional_position_[1], directional_position_[2]);
 	lightsSM->setShaderParameters(renderer->getDeviceContext(), world * pointLightPos, view, projection, lights_);
-	lightsSM->render(renderer->getDeviceContext(), directional_light_sphere_->getIndexCount()); 
+	lightsSM->render(renderer->getDeviceContext(), directional_light_sphere_->getIndexCount());
+
+	cube_mesh_->sendData(renderer->getDeviceContext());
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), XMMatrixTranslation(10, 1, 10) * world, view, projection, lights_);
+	lightsSM->render(renderer->getDeviceContext(), cube_mesh_->getIndexCount());
 }
 
 void App1::gui()
