@@ -15,10 +15,10 @@ LightsSM::~LightsSM()
 	}
 
 	// Release the light constant buffer.
-	if (colorBuffer)
+	if (lightBuffer)
 	{
-		colorBuffer->Release();
-		colorBuffer = 0;
+		lightBuffer->Release();
+		lightBuffer = 0;
 	}
 
 
@@ -29,7 +29,7 @@ LightsSM::~LightsSM()
 
 void LightsSM::initShader(const wchar_t* vs, const wchar_t* ps)
 {
-	D3D11_BUFFER_DESC colorBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 
 
@@ -49,16 +49,16 @@ void LightsSM::initShader(const wchar_t* vs, const wchar_t* ps)
 	// Setup light buffer
 	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
 	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-	colorBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	colorBufferDesc.ByteWidth = sizeof(ColorBufferType);
-	colorBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	colorBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	colorBufferDesc.MiscFlags = 0;
-	colorBufferDesc.StructureByteStride = 0;
-	renderer->CreateBuffer(&colorBufferDesc, NULL, &colorBuffer);
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
 }
 
-void LightsSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT4 color)
+void LightsSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, Light* lights[])
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -80,13 +80,22 @@ void LightsSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMM
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 
 	//Send to pixel shader
-	deviceContext->Map(colorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	ColorBufferType* colorPtr;
-	colorPtr = (ColorBufferType*)mappedResource.pData;
+	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	LightBufferType* lightPtr;
+	lightPtr = (LightBufferType*)mappedResource.pData;
 
-	colorPtr->lightColor = color;
-	deviceContext->Unmap(colorBuffer, 0);
+	lightPtr->ambient = lights[0]->getAmbientColour();
+	//Directional
+	lightPtr->diffuse[0] = lights[0]->getDiffuseColour();
+	lightPtr->position[0] = XMFLOAT4(lights[0]->getPosition().x, lights[0]->getPosition().y, lights[0]->getPosition().z, 1);
+	lightPtr->direction = lights[0]->getDirection();
+	//Point light
+	lightPtr->diffuse[1] = lights[1]->getDiffuseColour();
+	lightPtr->position[1] = XMFLOAT4(lights[1]->getPosition().x, lights[1]->getPosition().y, lights[1]->getPosition().z, 1);
 
-	deviceContext->PSSetConstantBuffers(0, 1, &colorBuffer);
+	lightPtr->padding = 0; 
+	deviceContext->Unmap(lightBuffer, 0);
+
+	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 }
 

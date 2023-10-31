@@ -21,12 +21,21 @@ TextureSM::~TextureSM()
 		matrixBuffer = 0;
 	}
 
+
+	// Release the light constant buffer.
+	if (lightBuffer)
+	{
+		lightBuffer->Release();
+		lightBuffer = 0;
+	}
+
 	// Release the layout.
 	if (layout)
 	{
 		layout->Release();
 		layout = 0;
 	}
+
 
 	//Release base shader components
 	BaseShader::~BaseShader();
@@ -36,6 +45,7 @@ TextureSM::~TextureSM()
 void TextureSM::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 
 	// Load (+ compile) shader files
@@ -67,10 +77,23 @@ void TextureSM::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 	// Create the texture sampler state.
 	renderer->CreateSamplerState(&samplerDesc, &samplerState);
 
+
+
+	// Setup light buffer
+// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
 }
 
 
-void TextureSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture)
+void TextureSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, 
+	ID3D11ShaderResourceView* texture, Light* lights[])
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -90,6 +113,20 @@ void TextureSM::setShaderParameters(ID3D11DeviceContext* deviceContext, const XM
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+
+	//Send to pixel shader
+	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	LightBufferType* lightPtr;
+	lightPtr = (LightBufferType*)mappedResource.pData;
+
+	lightPtr->ambient = lights[0]->getAmbientColour();
+	lightPtr->diffuse = lights[0]->getDiffuseColour();
+	lightPtr->position = XMFLOAT4(lights[0]->getPosition().x, lights[0]->getPosition().y, lights[0]->getPosition().z, 1);
+	lightPtr->direction = lights[0]->getDirection();
+	lightPtr->padding = 0;
+	deviceContext->Unmap(lightBuffer, 0);
+
+	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 
 	// Set shader texture and sampler resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
