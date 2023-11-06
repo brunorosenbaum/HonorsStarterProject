@@ -23,6 +23,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	cube_mesh_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
 	parent_segment_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
 	child_segment_1 = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+	child_segment_2 = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
 
 	//Initialize lights
 	lights_[0] = new Light(); //DIRECTIONAL LIGHT
@@ -132,14 +133,23 @@ void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 	lightsSM->render(renderer->getDeviceContext(), cube_mesh_->getIndexCount());
 
 	//Parent segment
+	XMFLOAT3 parentPos = { 5, 10, 5 };
+	XMMATRIX parentPosMatrix = XMMatrixTranslation(parentPos.x, parentPos.y, parentPos.z); 
 	parent_segment_->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(), transformToSegment(world) * XMMatrixTranslation(5, 10, 5), view, projection, lights_);
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), transformToSegment(world) * parentPosMatrix, view, projection, lights_);
 	lightsSM->render(renderer->getDeviceContext(), parent_segment_->getIndexCount());
 
 	//Child 1
+	XMMATRIX child1Pos = transformChildSegment(parentPosMatrix); 
 	child_segment_1->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(),  transformToSegment(world) * XMMatrixTranslation(5, 0, 5), view, projection, lights_);
+	lightsSM->setShaderParameters(renderer->getDeviceContext(),  transformToSegment(world) * child1Pos, view, projection, lights_);
 	lightsSM->render(renderer->getDeviceContext(), child_segment_1->getIndexCount());
+
+	//Child 2
+	XMMATRIX child2Pos = transformChildSegment(child1Pos); 
+	child_segment_2->sendData(renderer->getDeviceContext());
+	lightsSM->setShaderParameters(renderer->getDeviceContext(),  transformToSegment(world) * child2Pos, view, projection, lights_);
+	lightsSM->render(renderer->getDeviceContext(), child_segment_2->getIndexCount());
 }
 
 XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into homogenous segments
@@ -149,13 +159,13 @@ XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into 
 	return worldMatrix * transformMatrix; 
 }
 
-XMMATRIX App1::transformChildSegment(XMFLOAT3 endParent)
+XMMATRIX App1::transformChildSegment(XMMATRIX endParent)
 {
 	//Translates next segment into lower end of parent segment
 	XMMATRIX transformMatrix = XMMatrixIdentity();
-	XMVECTORF32 data = { endParent.x, endParent.y, endParent.z, 1 };
-	XMVECTOR parent = data;
-	transformMatrix *= XMMatrixTranslationFromVector(parent);
+	
+	transformMatrix = XMMatrixTranslation(0, -10, 0);
+	transformMatrix *= endParent;
 	//Rotates angle around x axis
 	//Rotates angle around y axis
 	return transformMatrix; 
