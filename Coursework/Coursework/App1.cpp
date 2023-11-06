@@ -21,6 +21,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	plane_mesh_ = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
 	directional_light_sphere_ = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	cube_mesh_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+	segment_mesh_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
 
 	//Initialize lights
 	lights_[0] = new Light(); //DIRECTIONAL LIGHT
@@ -128,6 +129,17 @@ void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 	cube_mesh_->sendData(renderer->getDeviceContext());
 	lightsSM->setShaderParameters(renderer->getDeviceContext(), XMMatrixTranslation(10, 1, 10) * world, view, projection, lights_);
 	lightsSM->render(renderer->getDeviceContext(), cube_mesh_->getIndexCount());
+
+	segment_mesh_->sendData(renderer->getDeviceContext());
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), transformToSegment(world), view, projection, lights_);
+	lightsSM->render(renderer->getDeviceContext(), segment_mesh_->getIndexCount());
+}
+
+XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into homogenous segments
+{
+	XMMATRIX transformMatrix = XMMatrixIdentity();
+	transformMatrix *= XMMatrixScaling(0.1, 5, 0.1);
+	return worldMatrix * transformMatrix; 
 }
 
 void App1::gui()

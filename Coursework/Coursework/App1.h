@@ -21,6 +21,7 @@ protected:
 	bool render();
 	void drawPlane(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
 	void drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
+	XMMATRIX transformToSegment(XMMATRIX worldMatrix);
 	void gui();
 
 private:
@@ -29,6 +30,7 @@ private:
 	PlaneMesh* plane_mesh_;
 	SphereMesh* directional_light_sphere_;
 	CubeMesh* cube_mesh_;
+	CubeMesh* segment_mesh_;
 
 	//Lights
 	Light* lights_[2]; //Directional 1, point 2
