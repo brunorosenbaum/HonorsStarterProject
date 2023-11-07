@@ -133,7 +133,7 @@ void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 	lightsSM->render(renderer->getDeviceContext(), cube_mesh_->getIndexCount());
 
 	//Parent segment
-	XMFLOAT3 parentPos = { 5, 10, 5 };
+	XMFLOAT3 parentPos = { 10, 30, 10 };
 	XMMATRIX parentPosMatrix = XMMatrixTranslation(parentPos.x, parentPos.y, parentPos.z); 
 	parent_segment_->sendData(renderer->getDeviceContext());
 	lightsSM->setShaderParameters(renderer->getDeviceContext(), transformToSegment(world) * parentPosMatrix, view, projection, lights_);
@@ -142,13 +142,13 @@ void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 	//Child 1
 	XMMATRIX child1Pos = transformChildSegment(parentPosMatrix); 
 	child_segment_1->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(),  transformToSegment(world) * child1Pos, view, projection, lights_);
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), transformToSegment(world) * child1Pos, view, projection, lights_);
 	lightsSM->render(renderer->getDeviceContext(), child_segment_1->getIndexCount());
 
 	//Child 2
 	XMMATRIX child2Pos = transformChildSegment(child1Pos); 
 	child_segment_2->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(),  transformToSegment(world) * child2Pos, view, projection, lights_);
+	lightsSM->setShaderParameters(renderer->getDeviceContext(), transformToSegment(world) * child2Pos, view, projection, lights_);
 	lightsSM->render(renderer->getDeviceContext(), child_segment_2->getIndexCount());
 }
 
@@ -162,13 +162,13 @@ XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into 
 XMMATRIX App1::transformChildSegment(XMMATRIX endParent)
 {
 	//Translates next segment into lower end of parent segment
-	XMMATRIX transformMatrix = XMMatrixIdentity();
-	
-	transformMatrix = XMMatrixTranslation(0, -10, 0);
-	transformMatrix *= endParent;
-	//Rotates angle around x axis
-	//Rotates angle around y axis
-	return transformMatrix; 
+	XMMATRIX translationMatrix = XMMatrixTranslation(0, -9.9, -0.83); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
+	XMMATRIX rotateMatrix = XMMatrixRotationX(0.17); //10º to rad
+
+	translationMatrix *= endParent; 
+	XMMATRIX transform = rotateMatrix * translationMatrix; 
+
+	return transform; 
 
 }
 
