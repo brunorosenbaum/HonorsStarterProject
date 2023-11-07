@@ -6,7 +6,8 @@ App1::App1()
 {
 	plane_mesh_ = nullptr; 
 	directional_light_sphere_ = nullptr;
-	cube_mesh_ = nullptr; 
+	cube_mesh_ = nullptr;
+	
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -53,6 +54,10 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureSM = new TextureSM(renderer->getDevice(), hwnd);
 	lightsSM = new LightsSM(renderer->getDevice(), hwnd); 
 
+	float z = rand() % 25 + (-12); //25 Possible values between 12 and -12
+	float x = rand() % 25 + (-12); //25 Possible values between 12 and -12
+	this->rotZ = &z;
+	this->rotX = &x;
 
 }
 
@@ -161,9 +166,32 @@ XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into 
 
 XMMATRIX App1::transformChildSegment(XMMATRIX endParent)
 {
+
+	////Generate random degrees between -12 and +12 that'll be the tilt in z and x axis
+	//float rotX = rand() % 25 + (-12); //25 Possible values between 12 and -12
+	//float rotZ = rand() % 25 + (-12);
+
+	/*float xRot = *rotX;
+	float zRot = *rotZ;*/
+
+	float xRot = -10; 
+	float zRot = 10; 
+	/**rotX = -10; 
+	*rotZ = 10;*/
+	//Convert to radians
+	xRot = XMConvertToRadians(xRot);
+	zRot = XMConvertToRadians(zRot);
+	//Assign radians to new variables
+	float zTilt = xRot;
+	float xTilt = zRot;
+	//Idk how to make this without an if statement bc my brain doesnt have enough wrinkles
+	//Essentially if the tilt is negative (-0.7), translate 0.3 in the z axis, if it's positive (0.7), translate -0.3
+	xTilt = (xTilt < 0) ? (xTilt + 1) : (1 - xTilt); 
+	zTilt = (zTilt < 0) ? (zTilt + 1) : (1 - zTilt);
+
 	//Translates next segment into lower end of parent segment
-	XMMATRIX translationMatrix = XMMatrixTranslation(0, -9.9, -0.83); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
-	XMMATRIX rotateMatrix = XMMatrixRotationX(0.17); //10º to rad
+	XMMATRIX translationMatrix = XMMatrixTranslation(xTilt, -9.9, zTilt); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
+	XMMATRIX rotateMatrix = XMMatrixRotationRollPitchYaw(xRot, 0, zRot);
 
 	translationMatrix *= endParent; 
 	XMMATRIX transform = rotateMatrix * translationMatrix; 

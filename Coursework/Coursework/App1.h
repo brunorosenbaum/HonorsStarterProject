@@ -42,7 +42,10 @@ private:
 
 	//Shader managers
 	TextureSM* textureSM;
-	LightsSM* lightsSM; 
+	LightsSM* lightsSM;
+
+	//Generate random degrees between -12 and +12 that'll be the tilt in z and x axis
+	float *rotX, *rotZ; 
 };
 
 #endif

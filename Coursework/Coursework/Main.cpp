@@ -7,6 +7,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	App1* app = new App1();
 	System* system;
 
+	srand(time(NULL));
+
 	// Create the system object.
 	system = new System(app, 1200, 675, true, false);
 
