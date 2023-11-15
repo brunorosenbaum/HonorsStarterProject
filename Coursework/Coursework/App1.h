@@ -45,7 +45,8 @@ private:
 	LightsSM* lightsSM;
 
 	//Generate random degrees between -12 and +12 that'll be the tilt in z and x axis
-	float *rotX, *rotZ; 
+	float rotX = 0;
+	float rotZ = 0;
 };
 
 #endif

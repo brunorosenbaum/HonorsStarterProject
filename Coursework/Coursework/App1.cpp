@@ -54,10 +54,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureSM = new TextureSM(renderer->getDevice(), hwnd);
 	lightsSM = new LightsSM(renderer->getDevice(), hwnd); 
 
-	float z = rand() % 25 + (-12); //25 Possible values between 12 and -12
-	float x = rand() % 25 + (-12); //25 Possible values between 12 and -12
-	this->rotZ = &z;
-	this->rotX = &x;
+	rotX = rand() % 25 + (-12); //25 Possible values between 12 and -12
+	rotZ = rand() % 25 + (-12); //25 Possible values between 12 and -12
+	
 
 }
 
@@ -171,26 +170,29 @@ XMMATRIX App1::transformChildSegment(XMMATRIX endParent)
 	//float rotX = rand() % 25 + (-12); //25 Possible values between 12 and -12
 	//float rotZ = rand() % 25 + (-12);
 
-	/*float xRot = *rotX;
-	float zRot = *rotZ;*/
+	float xRot = rotX;
+	float zRot = rotZ;
 
-	float xRot = -10; 
-	float zRot = 10; 
-	/**rotX = -10; 
-	*rotZ = 10;*/
+	/*float xRot = -10; 
+	float zRot = 10; */
+
 	//Convert to radians
 	xRot = XMConvertToRadians(xRot);
 	zRot = XMConvertToRadians(zRot);
 	//Assign radians to new variables
 	float zTilt = xRot;
 	float xTilt = zRot;
+	float temp = XMConvertToRadians(90);
 	//Idk how to make this without an if statement bc my brain doesnt have enough wrinkles
 	//Essentially if the tilt is negative (-0.7), translate 0.3 in the z axis, if it's positive (0.7), translate -0.3
-	xTilt = (xTilt < 0) ? (xTilt + 1) : (1 - xTilt); 
-	zTilt = (zTilt < 0) ? (zTilt + 1) : (1 - zTilt);
+	/*xTilt = (xTilt < 0) ? (xTilt + 1) : (1 - xTilt); 
+	zTilt = (zTilt < 0) ? (zTilt + 1) : (1 - zTilt);*/
+
+	xTilt = (xTilt < 0) ? (1) : ( -1); 
+	zTilt = (zTilt < 0) ? (1) : (- 1);
 
 	//Translates next segment into lower end of parent segment
-	XMMATRIX translationMatrix = XMMatrixTranslation(xTilt, -9.9, zTilt); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
+	XMMATRIX translationMatrix = XMMatrixTranslation(zTilt * sin(xRot), -9.9, xTilt * sin(zRot)); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
 	XMMATRIX rotateMatrix = XMMatrixRotationRollPitchYaw(xRot, 0, zRot);
 
 	translationMatrix *= endParent; 
@@ -220,6 +222,8 @@ void App1::gui()
 		ImGui::TreePop();
 
 	}
+	ImGui::SliderFloat("X Tilt angle", &rotX, -12, 12, "%f"); 
+	ImGui::SliderFloat("Z Tilt angle", &rotZ, -12, 12, "%f"); 
 
 	// Render UI
 	ImGui::Render();
