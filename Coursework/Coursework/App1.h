@@ -23,6 +23,7 @@ protected:
 	void drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
 	XMMATRIX transformToSegment(XMMATRIX worldMatrix);
 	XMMATRIX transformChildSegment(XMMATRIX endParent);
+	XMMATRIX translateChild(/*XMMATRIX endParent*/);
 	void gui();
 
 private:

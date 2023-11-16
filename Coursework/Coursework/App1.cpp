@@ -166,15 +166,8 @@ XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into 
 XMMATRIX App1::transformChildSegment(XMMATRIX endParent)
 {
 
-	////Generate random degrees between -12 and +12 that'll be the tilt in z and x axis
-	//float rotX = rand() % 25 + (-12); //25 Possible values between 12 and -12
-	//float rotZ = rand() % 25 + (-12);
-
 	float xRot = rotX;
 	float zRot = rotZ;
-
-	/*float xRot = -10; 
-	float zRot = 10; */
 
 	//Convert to radians
 	xRot = XMConvertToRadians(xRot);
@@ -183,22 +176,35 @@ XMMATRIX App1::transformChildSegment(XMMATRIX endParent)
 	float zTilt = xRot;
 	float xTilt = zRot;
 	float temp = XMConvertToRadians(90);
-	//Idk how to make this without an if statement bc my brain doesnt have enough wrinkles
+	
 	//Essentially if the tilt is negative (-0.7), translate 0.3 in the z axis, if it's positive (0.7), translate -0.3
 	/*xTilt = (xTilt < 0) ? (xTilt + 1) : (1 - xTilt); 
 	zTilt = (zTilt < 0) ? (zTilt + 1) : (1 - zTilt);*/
 
-	xTilt = (xTilt < 0) ? (1) : ( -1); 
-	zTilt = (zTilt < 0) ? (1) : (- 1);
+	xTilt = (xTilt < 0) ? (1 + xTilt) : (1 - xTilt);
+	zTilt = (zTilt < 0) ? (1 + zTilt) : (1 - zTilt);
 
 	//Translates next segment into lower end of parent segment
-	XMMATRIX translationMatrix = XMMatrixTranslation(zTilt * sin(xRot), -9.9, xTilt * sin(zRot)); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
+	XMMATRIX translationMatrix = XMMatrixTranslation(0, -9.9, 0);
+
+	XMMATRIX tiltTranslationMatrix = XMMatrixTranslation(xTilt, 0, zTilt); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
+
 	XMMATRIX rotateMatrix = XMMatrixRotationRollPitchYaw(xRot, 0, zRot);
 
-	translationMatrix *= endParent; 
-	XMMATRIX transform = rotateMatrix * translationMatrix; 
+	endParent *= XMMatrixTranslation(0, 9.9, 0) * tiltTranslationMatrix;
+	//endParent *= tiltTranslationMatrix; 
+	/*tiltTranslationMatrix *= endParent; */
+	XMMATRIX transform = /*translationMatrix **/ /*translationMatrix **/  translationMatrix * rotateMatrix * endParent * XMMatrixTranslation(0, -9.9, 0); 
 
 	return transform; 
+
+}
+
+XMMATRIX App1::translateChild(/*XMMATRIX endParent*/)
+{
+	XMMATRIX translationMatrix = XMMatrixTranslation(0, -5, 0);
+	/*endParent *= translationMatrix;*/
+	return translationMatrix; 
 
 }
 
