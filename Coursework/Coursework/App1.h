@@ -21,8 +21,11 @@ protected:
 	bool render();
 	void drawPlane(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
 	void drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection);
+	float InvLerp(float a, float b, float t); 
+	float Lerp(float a, float b, float t);
+	float Remap(float iMin, float iMax, float oMin, float oMax, float v); 
 	XMMATRIX transformToSegment(XMMATRIX worldMatrix);
-	XMMATRIX transformChildSegment(XMMATRIX endParent);
+	XMMATRIX transformChildSegment(XMMATRIX parentPos);
 	XMMATRIX translateChild(/*XMMATRIX endParent*/);
 	void gui();
 
@@ -48,6 +51,7 @@ private:
 	//Generate random degrees between -12 and +12 that'll be the tilt in z and x axis
 	float rotX = 0;
 	float rotZ = 0;
+	const int degrees = 16; 
 };
 
 #endif
