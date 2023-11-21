@@ -23,8 +23,19 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	directional_light_sphere_ = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	cube_mesh_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
 	parent_segment_ = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
-	child_segment_1 = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
-	child_segment_2 = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+	//Initialize child segments array 
+	for(int i = 0; i < 2; i++)
+	{
+		for(int j = 0; j < 2; j++)
+		{
+			childsegments[i][j] = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+		}
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		secondChildsegments[i] = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+
+	}
 
 	//Initialize lights
 	lights_[0] = new Light(); //DIRECTIONAL LIGHT
@@ -56,7 +67,11 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	rotX = rand() % 33 + (-degrees); //32 Possible values between 16 and -16
 	rotZ = rand() % 33 + (-degrees); //32 Possible values between 16 and -16
-	
+
+	rotXChild1 = rand() % 33 + (-degrees);
+	rotZChild1 = rand() % 33 + (-degrees);
+	rotXChild2 = rand() % 33 + (-degrees);
+	rotZChild1 = rand() % 33 + (-degrees);
 
 }
 
@@ -174,98 +189,89 @@ void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 
 	float zTilt = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -2.5, 2.5, xRot); 
 	float xTilt = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -2.5, 2.5, -zRot); 
-	
-
 
 	/*XMMATRIX localTransform = XMMatrixTranslation(0, 0, 0);
 	parentM *= localTransform;*/
 
 	//Translates next segment into lower end of parent segment
 	XMMATRIX endTranslation = XMMatrixTranslation(0,-20, 0);
-	parentM *= endTranslation;
-
-	//Angle rot
 	XMMATRIX rotation = XMMatrixRotationRollPitchYaw(xRot, 0, zRot);
-	parentM *= rotation; 
-
 	XMMATRIX tilt = XMMatrixTranslation(xTilt, 0, zTilt);
-	parentM *= tilt;
 
-	
-	//Child 1
-	XMMATRIX child1Pos = parentM; 
-	child_segment_1->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child1Pos * parentPosMatrix, view, projection, lights_);
-	lightsSM->render(renderer->getDeviceContext(), child_segment_1->getIndexCount());
+	for(int i = 0; i < 2; i++)
+	{
+		rotation = (i < 1) ? XMMatrixRotationRollPitchYaw(-xRot, 0, zRot) : XMMatrixRotationRollPitchYaw(xRot, 0, zRot);
+		tilt = (i < 1) ? XMMatrixTranslation(xTilt, 0, -zTilt) : XMMatrixTranslation(xTilt, 0, zTilt);
 
-	//Child 2
-	//parentM *= localTransform;
-	parentM *= endTranslation; 
-	parentM *= rotation;
-	parentM *= tilt; 
+		XMMATRIX child1 = parentM;
+		child1 *= endTranslation;
+		child1 *= rotation;
+		child1 *= tilt;
+		
+		childsegments[i][0]->sendData(renderer->getDeviceContext());
+		lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child1 * parentPosMatrix, view, projection, lights_);
+		lightsSM->render(renderer->getDeviceContext(), childsegments[i][0]->getIndexCount());
 
-	XMMATRIX child2Pos = parentM; 
-	child_segment_2->sendData(renderer->getDeviceContext());
-	lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child2Pos * parentPosMatrix, view, projection, lights_);
-	lightsSM->render(renderer->getDeviceContext(), child_segment_2->getIndexCount());
+		for(int j = 0; j < 2; j++)
+		{
+			float xcr = XMConvertToRadians(rotXChild1);
+			float zcr = XMConvertToRadians(rotZChild1);
+
+			XMMATRIX childRotation = (j < 1) ? XMMatrixRotationRollPitchYaw(-xcr, 0, zcr) : XMMatrixRotationRollPitchYaw(xcr, 0, zcr);
+
+			float zct = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -7.5, 7.5, xcr);
+			float xct = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -7.5, 7.5, -zcr);
+
+			XMMATRIX childTilt = (j < 1) ? XMMatrixTranslation(xct, 0, -zct) : XMMatrixTranslation(xct, 0, zct);
+
+
+			XMMATRIX child2 = child1; 
+			child2 *= endTranslation;
+			child2 *= rotation;
+			child2 *= tilt;
+			//child2 *= endTranslation;
+			child2 *= childRotation;
+			child2 *= childTilt;
+
+
+			childsegments[0][j]->sendData(renderer->getDeviceContext());
+			lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child2 * parentPosMatrix, view, projection, lights_);
+			lightsSM->render(renderer->getDeviceContext(), childsegments[0][j]->getIndexCount());
+
+			for(int k = 0; k < 3; k++)
+			{
+				float xcr2 = XMConvertToRadians(rotXChild2);
+				float zcr2 = XMConvertToRadians(rotZChild2);
+
+				XMMATRIX child2Rotation = (k < 1) ? XMMatrixRotationRollPitchYaw(-xcr2, 0, zcr2) : XMMatrixRotationRollPitchYaw(xcr2, 0, zcr2);
+
+				float zct2 = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -12.5, 12.5, xcr2);
+				float xct2 = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -12.5, 12.5, -zcr2);
+
+				XMMATRIX child2Tilt = (k < 1) ? XMMatrixTranslation(xct2, 0, -zct2) : XMMatrixTranslation(xct2, 0, zct2);
+
+
+
+				XMMATRIX child3 =  XMMatrixScaling(0.5, 2, 0.5 ) * child2 ;
+				child3 *= endTranslation;
+				child3 *= rotation;
+				child3 *= tilt;
+				child3 *= XMMatrixTranslation(0, -5, 0); 
+				child3 *= childRotation;
+				child3 *= childTilt;
+				//child3 *= child2Rotation;
+				//child3 *= child2Tilt; 
+
+				secondChildsegments[k]->sendData(renderer->getDeviceContext());
+				lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child3 * parentPosMatrix, view, projection, lights_);
+				lightsSM->render(renderer->getDeviceContext(), secondChildsegments[k]->getIndexCount());
+			}
+
+		}
+	}
 }
 
 
-
-XMMATRIX App1::transformToSegment(XMMATRIX worldMatrix) //Transforms cubes into homogenous segments
-{
-	XMMATRIX transformMatrix = XMMatrixIdentity();
-	transformMatrix *= XMMatrixScaling(0.1, 5, 0.1);
-	return worldMatrix * transformMatrix; 
-}
-
-XMMATRIX App1::transformChildSegment(XMMATRIX parentPos)
-{
-	//Stores generated angles at init in local vars
-	float xRot = rotX;
-	float zRot = rotZ;
-
-	//Convert to radians
-	xRot = XMConvertToRadians(xRot);
-	zRot = XMConvertToRadians(zRot);
-
-	////Assign radians to new variables
-	//float zTilt = xRot;
-	//float xTilt = zRot;
-	//float temp = XMConvertToRadians(90);
-	////Essentially if the tilt is negative (-0.7), translate 0.3 in the z axis, if it's positive (0.7), translate -0.3
-	///*xTilt = (xTilt < 0) ? (xTilt + 1) : (1 - xTilt); 
-	//zTilt = (zTilt < 0) ? (zTilt + 1) : (1 - zTilt);*/
-	//xTilt = (xTilt < 0) ? (1 + xTilt) : (1 - xTilt);
-	//zTilt = (zTilt < 0) ? (1 + zTilt) : (1 - zTilt);
-	//XMMATRIX tiltTranslationMatrix = XMMatrixTranslation(xTilt, 0, zTilt); //0.83 Since it's 1 - 0.17 (tilts forward so it matches the parents end)
-
-	//Scaling
-	XMMATRIX scale = XMMatrixIdentity(); //Matrix for scaling cubes into long segments
-	scale *= XMMatrixScaling(0.1, 5, 0.1);
-
-	//Translates next segment into lower end of parent segment
-	XMMATRIX endTranslation = XMMatrixTranslation(0, -10, 0);
-
-	//Angle rot
-	XMMATRIX rotation = XMMatrixRotationRollPitchYaw(xRot, 0, zRot);
-
-	
-	//parentPos *= tiltTranslationMatrix; 
-	/*tiltTranslationMatrix *= parentPos; */
-	XMMATRIX finalM = parentPos * scale * rotation * endTranslation; 
-
-	return finalM; 
-
-}
-
-XMMATRIX App1::translateChild(/*XMMATRIX endParent*/)
-{
-	XMMATRIX translationMatrix = XMMatrixTranslation(0, -5, 0);
-	/*endParent *= translationMatrix;*/
-	return translationMatrix; 
-
-}
 
 void App1::gui()
 {
@@ -288,7 +294,12 @@ void App1::gui()
 
 	}
 	ImGui::SliderFloat("X Angle", &rotX, -degrees, degrees, "%f"); 
-	ImGui::SliderFloat("Z Angle", &rotZ, -degrees, degrees, "%f"); 
+	ImGui::SliderFloat("Z Angle", &rotZ, -degrees, degrees, "%f");
+	ImGui::SliderFloat("X Angle Child 1", &rotXChild1, -degrees, degrees, "%f");
+	ImGui::SliderFloat("Z Angle Child 1", &rotZChild1, -degrees, degrees, "%f");
+	ImGui::SliderFloat("X Angle Child 2", &rotXChild2, -degrees, degrees, "%f");
+	ImGui::SliderFloat("Z Angle Child 2", &rotZChild2, -degrees, degrees, "%f");
+	
 
 	// Render UI
 	ImGui::Render();

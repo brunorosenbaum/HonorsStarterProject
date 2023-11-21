@@ -24,9 +24,7 @@ protected:
 	float InvLerp(float a, float b, float t); 
 	float Lerp(float a, float b, float t);
 	float Remap(float iMin, float iMax, float oMin, float oMax, float v); 
-	XMMATRIX transformToSegment(XMMATRIX worldMatrix);
-	XMMATRIX transformChildSegment(XMMATRIX parentPos);
-	XMMATRIX translateChild(/*XMMATRIX endParent*/);
+
 	void gui();
 
 private:
@@ -36,8 +34,9 @@ private:
 	SphereMesh* directional_light_sphere_;
 	CubeMesh* cube_mesh_;
 	CubeMesh* parent_segment_;
-	CubeMesh* child_segment_1;
-	CubeMesh* child_segment_2;
+	
+	CubeMesh* childsegments[2][2]; 
+	CubeMesh* secondChildsegments[3]; 
 
 	//Lights
 	Light* lights_[2]; //Directional 1, point 2
@@ -51,6 +50,13 @@ private:
 	//Generate random degrees between -12 and +12 that'll be the tilt in z and x axis
 	float rotX = 0;
 	float rotZ = 0;
+
+	float rotXChild1 = 0;
+	float rotZChild1 = 0;
+
+	float rotXChild2 = 0;
+	float rotZChild2 = 0;
+
 	const int degrees = 16; 
 };
 
