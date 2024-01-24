@@ -238,34 +238,34 @@ void App1::drawObjects(XMMATRIX& world, XMMATRIX& view, XMMATRIX& projection)
 			lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child2 * parentPosMatrix, view, projection, lights_);
 			lightsSM->render(renderer->getDeviceContext(), childsegments[0][j]->getIndexCount());
 
-			for(int k = 0; k < 3; k++)
-			{
-				float xcr2 = XMConvertToRadians(rotXChild2);
-				float zcr2 = XMConvertToRadians(rotZChild2);
+			//for(int k = 0; k < 3; k++)
+			//{
+			//	float xcr2 = XMConvertToRadians(rotXChild2);
+			//	float zcr2 = XMConvertToRadians(rotZChild2);
 
-				XMMATRIX child2Rotation = (k < 1) ? XMMatrixRotationRollPitchYaw(-xcr2, 0, zcr2) : XMMatrixRotationRollPitchYaw(xcr2, 0, zcr2);
+			//	XMMATRIX child2Rotation = (k < 1) ? XMMatrixRotationRollPitchYaw(-xcr2, 0, zcr2) : XMMatrixRotationRollPitchYaw(xcr2, 0, zcr2);
 
-				float zct2 = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -12.5, 12.5, xcr2);
-				float xct2 = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -12.5, 12.5, -zcr2);
+			//	float zct2 = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -12.5, 12.5, xcr2);
+			//	float xct2 = Remap(XMConvertToRadians(-degrees), XMConvertToRadians(degrees), -12.5, 12.5, -zcr2);
 
-				XMMATRIX child2Tilt = (k < 1) ? XMMatrixTranslation(xct2, 0, -zct2) : XMMatrixTranslation(xct2, 0, zct2);
+			//	XMMATRIX child2Tilt = (k < 1) ? XMMatrixTranslation(xct2, 0, -zct2) : XMMatrixTranslation(xct2, 0, zct2);
 
 
 
-				XMMATRIX child3 =  XMMatrixScaling(0.5, 2, 0.5 ) * child2 ;
-				child3 *= endTranslation;
-				child3 *= rotation;
-				child3 *= tilt;
-				child3 *= XMMatrixTranslation(0, -5, 0); 
-				child3 *= childRotation;
-				child3 *= childTilt;
-				//child3 *= child2Rotation;
-				//child3 *= child2Tilt; 
+			//	XMMATRIX child3 =  XMMatrixScaling(0.5, 2, 0.5 ) * child2 ;
+			//	child3 *= endTranslation;
+			//	child3 *= rotation;
+			//	child3 *= tilt;
+			//	child3 *= XMMatrixTranslation(0, -5, 0); 
+			//	child3 *= childRotation;
+			//	child3 *= childTilt;
+			//	//child3 *= child2Rotation;
+			//	//child3 *= child2Tilt; 
 
-				secondChildsegments[k]->sendData(renderer->getDeviceContext());
-				lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child3 * parentPosMatrix, view, projection, lights_);
-				lightsSM->render(renderer->getDeviceContext(), secondChildsegments[k]->getIndexCount());
-			}
+			//	secondChildsegments[k]->sendData(renderer->getDeviceContext());
+			//	lightsSM->setShaderParameters(renderer->getDeviceContext(), world * child3 * parentPosMatrix, view, projection, lights_);
+			//	lightsSM->render(renderer->getDeviceContext(), secondChildsegments[k]->getIndexCount());
+			//}
 
 		}
 	}
