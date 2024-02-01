@@ -168,6 +168,7 @@
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="App2_Cubes.cpp" />
+    <ClCompile Include="CELL.cpp" />
     <ClCompile Include="LightsSM.cpp" />
     <ClCompile Include="LinearSM.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="App1.h" />
     <ClInclude Include="App2_Cubes.h" />
+    <ClInclude Include="CELL.h" />
     <ClInclude Include="LightsSM.h" />
     <ClInclude Include="LinearSM.h" />
     <ClInclude Include="TextureSM.h" />
