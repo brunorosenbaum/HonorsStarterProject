@@ -66,6 +66,9 @@
     <ClCompile Include="CELL.cpp">
       <Filter>Source Files\LaplacianGrowth</Filter>
     </ClCompile>
+    <ClCompile Include="CG_SOLVER.cpp">
+      <Filter>Source Files\LaplacianGrowth</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files\ShaderManagers\App2</Filter>
     </ClInclude>
     <ClInclude Include="CELL.h">
+      <Filter>Header Files\LaplacianGrowth</Filter>
+    </ClInclude>
+    <ClInclude Include="CG_SOLVER.h">
       <Filter>Header Files\LaplacianGrowth</Filter>
     </ClInclude>
   </ItemGroup>
