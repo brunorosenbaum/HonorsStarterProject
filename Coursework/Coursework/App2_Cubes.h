@@ -3,6 +3,7 @@
 // Includes
 #include "DXF.h"
 #include "LinearSM.h"
+#include "../DXFramework/LineMesh.h"
 
 class App2_Cubes : public BaseApplication
 {
@@ -20,9 +21,11 @@ protected:
 	void gui();
 
 private:
-	//Vars
+	//Atts
 	PlaneMesh* plane_mesh_;
 	CubeMesh* cube_mesh_;
+	//LineMesh* line_mesh; 
+
 	LinearSM* linearSM; 
 };
 

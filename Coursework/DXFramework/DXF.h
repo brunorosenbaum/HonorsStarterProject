@@ -28,6 +28,7 @@
 #include "TessellationMesh.h"
 #include "TriangleMesh.h"
 #include "AModel.h"
+#include "LineMesh.h"
 
 // Include additional rendering headers
 #include "Light.h"
@@ -41,3 +42,6 @@
 //#include "imGUI/imgui.h"
 //#include "imGUI/imgui_impl_dx11.h"
 //#include "imGUI/imgui_impl_win32.h"
+
+
+
